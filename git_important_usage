@@ -1,0 +1,46 @@
+一、git创建本地仓库的一些步骤：
+1)：安装git
+       此时，可以创建文件夹来作为仓库
+2)：git init
+       通过此命令可以把上一步创建好的仓库变成Git可以管理的仓库
+   提示：Initialized empty Git repository in /目录**/**/.git/
+3)：git add
+       可以将一些file添加到仓库中，此时可以用git status查看状态，一般显示为green，暂存在仓库中
+     eg：git add *.c *.txt ... anything . Notice: USE 'git add . ' after you affirm the whole file is right file
+4)：git commit
+        将文件提交到仓库，此时git status，则完全将之前添加的文件正式提交到仓库中
+     eg：git commit -m "description",其中-m后输入的时本次提交的说明
+   
+二、如何制作LINUX的patch文件以及如何打patch
+1)：制作patch
+    diff -Nau(r) a.file b.file > *.patch , (r)表示a&b可以是目录,*.patch则为生成的补丁文件，用于提交给仓库
+2)：生成patch
+    git format-patch +commit_value(SHA-1) -1, 生成已经打到仓库中的patch.
+        Notice:must add '-1'，只适用于GIT的专用patch，与git am一般合用.
+    git diff HEAD^..HEAD > *.patch , 用于生成标准patch，输出两个commit之间的不同之处，兼容性强.
+3)：git am
+    安装patch,如果有冲突log便会提醒;如果没有冲突，便会直接打上补丁，进行提交.
+    Notice：git am必须使用的是git format-patch生成的patch文件来打补丁，不用使用git diff生成的补丁进行操作，否则会有如下的错误.
+            Patch format detection failed，这是在提醒patch格式与打补丁的命令不相符.
+4)：git apply
+    如果有冲突，可以用git apply *.patch --reject来生成.rej文件，手动进行打补丁.
+5)：git abort
+    结束上一次的提交信息，以免影响下一次打补丁.
+6)：git am --continue 
+    一般在手动解决冲突之后使用此命令完成提交的操作.
+
+三、使用邮件发送patch    
+    git send-email *.patch
+    在此之前,需要确认下~/.gitconfig文件,确认from发件人邮箱,to收件人邮箱,smtpserver使用的邮件发送协议服务器.
+    其中,有一些options需要注意:这是我在工作中犯的一个小错误.
+    From Leo(NXP)：
+        So the patch was sent out for internal review, right?  But we shouldn't include external people when sending for 
+    internal review.  They are probably included because these people are in the Signed-off-by list.  You can use 
+    "--suppress-cc=all" option of "git send-email" to avoid it.  And it is always a good habit to use " --dry-run" first to see 
+    if the recipients are correct before really sending out the patch.
+    大致的由来是,我们在解决USB root hub lost power的问题时发现了linux 4.9.79(our LSDK 1803 kernel version)有upsteram的解决办法，所以由我来进行
+    git send-email 一些相关patch.本来这是个internal review,不需要发送到公司外部review的patch,我没有加 --suppress-cc=all,便将patch抄送cc给了源代
+    码的author.
+    So，this is an important issue which needs our attention to notice！
+    
+  
